@@ -47,7 +47,15 @@ const grepFunction = async (extractDir) => {
       output += "\n";
     }
   });
-  grep.on("close", () => resolve({ stdout: output }));
+
+  grep.on("close", (code) => {
+    if (code === 0 || code === 1) {
+      resolve({ stdout: output });
+    } else {
+      reject(new Error(`grep exited with code ${code}`));
+    }
+  });
+
   grep.on("error", (error) => {
     if (error.code === "ENOENT") {
       reject(
