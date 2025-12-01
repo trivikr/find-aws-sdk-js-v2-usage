@@ -1,4 +1,4 @@
-import { Lambda } from "@aws-sdk/client-lambda";
+import { Lambda, paginateListFunctions } from "@aws-sdk/client-lambda";
 import unzipper from "unzipper";
 
 import { spawn } from "node:child_process";
@@ -9,6 +9,7 @@ import { join, dirname } from "node:path";
 const client = new Lambda();
 const tempDir = await mkdtemp(join(tmpdir(), "lambda-scan-"));
 
+const LAMBDA_LIST_FUNCTION_LIMIT = 50;
 const JS_TS_EXTENSIONS = [
   ".js",
   ".jsx",
@@ -111,18 +112,28 @@ const scanFunction = async (index, functionName) => {
 const response = await client.listFunctions();
 const functions = response.Functions.map((f) => f.FunctionName);
 
-const numFunctions = functions.length;
-if (numFunctions === 0) {
+const listFunctionsLength = functions.length;
+if (listFunctionsLength === 0) {
   console.log("No functions found.");
   process.exit(0);
 }
 
+if (listFunctionsLength >= LAMBDA_LIST_FUNCTION_LIMIT) {
+  functions.length = 0;
+
+  const paginator = paginateListFunctions({ client }, {});
+  for await (const page of paginator) {
+    functions.push(...page.Functions.map((f) => f.FunctionName));
+  }
+}
+
+const functionsLength = functions.length;
 console.log(
-  `Reading ${numFunctions} function${numFunctions > 1 ? "s" : ""}.\n`
+  `Reading ${functionsLength} function${functionsLength > 1 ? "s" : ""}.\n`
 );
 
 try {
-  for (let i = 0; i < functions.length; i++) {
+  for (let i = 0; i < functionsLength; i++) {
     await scanFunction(i + 1, functions[i]);
   }
 } finally {
