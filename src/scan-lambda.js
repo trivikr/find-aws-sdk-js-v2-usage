@@ -48,7 +48,17 @@ const grepFunction = async (extractDir) => {
     }
   });
   grep.on("close", () => resolve({ stdout: output }));
-  grep.on("error", (error) => reject(error));
+  grep.on("error", (error) => {
+    if (error.code === "ENOENT") {
+      reject(
+        new Error(
+          "The 'grep' command was not found. Please ensure 'grep' is installed and available in your PATH. See the README prerequisites section for more information."
+        )
+      );
+    } else {
+      reject(error);
+    }
+  });
 
   return promise;
 };
