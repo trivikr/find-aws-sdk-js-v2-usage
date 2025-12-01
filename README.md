@@ -45,6 +45,6 @@ Done.
 ```
 
 [AWSLambda_ReadOnlyAccess]: https://docs.aws.amazon.com/aws-managed-policy/latest/reference/AWSLambda_ReadOnlyAccess.html
-[grep]: https://share.google/L1FAo8GuYlQI2sHwI
+[grep]: https://www.gnu.org/software/grep/manual/grep.html
 [nvm]: https://github.com/nvm-sh/nvm#installation-and-update
 [SDK authentication with AWS]: https://docs.aws.amazon.com/sdk-for-javascript/v3/developer-guide/getting-your-credentials.html
