@@ -1,10 +1,10 @@
 import { Lambda } from "@aws-sdk/client-lambda";
-import extract from "extract-zip";
+import unzipper from "unzipper";
 
+import { spawn } from "node:child_process";
 import { mkdir, mkdtemp, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
-import { join } from "node:path";
-import { spawn } from "node:child_process";
+import { join, dirname } from "node:path";
 
 const client = new Lambda();
 
@@ -40,6 +40,24 @@ const grepFunction = async (extractDir) => {
   return promise;
 };
 
+const extractZip = async (zipPath, extractDir) => {
+  const directory = await unzipper.Open.file(zipPath);
+
+  for (const file of directory.files) {
+    // Skip 'node_modules' directory, as it's not the customer source code.
+    if (file.path.includes("node_modules/")) continue;
+
+    const outputPath = join(extractDir, file.path);
+
+    if (file.type === "Directory") {
+      await mkdir(outputPath, { recursive: true });
+    } else {
+      await mkdir(dirname(outputPath), { recursive: true });
+      await writeFile(outputPath, await file.buffer());
+    }
+  }
+};
+
 const scanFunction = async (functionName, tempDir) => {
   let funcDir;
   try {
@@ -50,15 +68,8 @@ const scanFunction = async (functionName, tempDir) => {
     const extractDir = join(funcDir, "extracted");
 
     await mkdir(extractDir, { recursive: true });
-
     await downloadFile(response.Code.Location, zipPath);
-    await extract(zipPath, { dir: extractDir });
-
-    // Delete 'node_modules' directory, as it's not the source code customer owns
-    await rm(join(extractDir, "node_modules"), {
-      recursive: true,
-      force: true,
-    });
+    await extractZip(zipPath, extractDir);
 
     const { stdout } = await grepFunction(extractDir);
 

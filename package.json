@@ -20,6 +20,6 @@
   "type": "module",
   "dependencies": {
     "@aws-sdk/client-lambda": "^3.942.0",
-    "extract-zip": "^2.0.1"
+    "unzipper": "^0.12.3"
   }
 }
