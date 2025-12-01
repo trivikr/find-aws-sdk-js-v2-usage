@@ -53,7 +53,7 @@ const extractZip = async (zipPath, extractDir) => {
       await mkdir(outputPath, { recursive: true });
     } else {
       await mkdir(dirname(outputPath), { recursive: true });
-      await writeFile(outputPath, await file.buffer());
+      await writeFile(outputPath, file.stream());
     }
   }
 };
