@@ -75,14 +75,12 @@ const extractZip = async (zipPath, extractDir) => {
 };
 
 const scanFunction = async (functionName, tempDir) => {
-  let funcDir;
+  const response = await client.getFunction({ FunctionName: functionName });
+
+  const funcDir = join(tempDir, functionName.replace(/[^a-zA-Z0-9]/g, "_"));
+  const zipPath = join(funcDir, "code.zip");
+  const extractDir = join(funcDir, "extracted");
   try {
-    const response = await client.getFunction({ FunctionName: functionName });
-
-    funcDir = join(tempDir, functionName.replace(/[^a-zA-Z0-9]/g, "_"));
-    const zipPath = join(funcDir, "code.zip");
-    const extractDir = join(funcDir, "extracted");
-
     await mkdir(extractDir, { recursive: true });
     await downloadFile(response.Code.Location, zipPath);
     await extractZip(zipPath, extractDir);
@@ -97,8 +95,6 @@ const scanFunction = async (functionName, tempDir) => {
       console.log("=".repeat(60));
       console.log();
     }
-  } catch (error) {
-    console.log(`Error: ${error.message}`);
   } finally {
     await rm(funcDir, { recursive: true, force: true });
   }
