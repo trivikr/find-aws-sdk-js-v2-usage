@@ -34,13 +34,12 @@ $ npm run scan:lambda
 
 Reading 2 functions.
 
-============================================================
-Found 3 aws-sdk references in 'function-which-imports-js-sdk-v2':
+1. Function 'function-which-imports-js-sdk-v2' has 3 aws-sdk references:
+- /double-quotes.mjs:1:import AWS from "aws-sdk";
+- /single-quotes.mjs:1:import AWS from 'aws-sdk';
+- /deep-import.mjs:1:import DynamoDB from "aws-sdk/clients/dynamodb";
 
-/double-quotes.mjs:1:import AWS from "aws-sdk";
-/single-quotes.mjs:1:import AWS from 'aws-sdk';
-/deep-import.mjs:1:import DynamoDB from "aws-sdk/clients/dynamodb";
-============================================================
+2. Function 'function-which-imports-js-sdk-v3' has no aws-sdk references.
 
 Done.
 ```

@@ -7,6 +7,8 @@ import { tmpdir } from "node:os";
 import { join, dirname } from "node:path";
 
 const client = new Lambda();
+const tempDir = await mkdtemp(join(tmpdir(), "lambda-scan-"));
+
 const JS_TS_EXTENSIONS = [
   ".js",
   ".jsx",
@@ -74,7 +76,7 @@ const extractZip = async (zipPath, extractDir) => {
   }
 };
 
-const scanFunction = async (functionName, tempDir) => {
+const scanFunction = async (index, functionName) => {
   const response = await client.getFunction({ FunctionName: functionName });
 
   const funcDir = join(tempDir, functionName.replace(/[^a-zA-Z0-9]/g, "_"));
@@ -89,18 +91,22 @@ const scanFunction = async (functionName, tempDir) => {
 
     if (stdout) {
       const count = (stdout.match(/\n/g) || []).length;
-      console.log("=".repeat(60));
-      console.log(`Found ${count} aws-sdk references in '${functionName}':\n`);
-      console.log(stdout.slice(0, -1));
-      console.log("=".repeat(60));
+      console.log(
+        `${index}. Function '${functionName}' has ${count} aws-sdk references:`
+      );
+      for (const line of stdout.trim().split("\n")) {
+        console.log(`- ${line}`);
+      }
       console.log();
+    } else {
+      console.log(
+        `${index}. Function '${functionName}' has no aws-sdk references.\n`
+      );
     }
   } finally {
     await rm(funcDir, { recursive: true, force: true });
   }
 };
-
-const tempDir = await mkdtemp(join(tmpdir(), "lambda-scan-"));
 
 const response = await client.listFunctions();
 const functions = response.Functions.map((f) => f.FunctionName);
@@ -116,8 +122,8 @@ console.log(
 );
 
 try {
-  for (const func of functions) {
-    await scanFunction(func, tempDir);
+  for (let i = 0; i < functions.length; i++) {
+    await scanFunction(i + 1, functions[i]);
   }
 } finally {
   await rm(tempDir, { recursive: true, force: true });
