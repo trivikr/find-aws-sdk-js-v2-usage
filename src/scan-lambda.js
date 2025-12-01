@@ -7,6 +7,16 @@ import { tmpdir } from "node:os";
 import { join, dirname } from "node:path";
 
 const client = new Lambda();
+const JS_TS_EXTENSIONS = [
+  ".js",
+  ".jsx",
+  ".ts",
+  ".tsx",
+  ".mjs",
+  ".cjs",
+  ".mts",
+  ".cts",
+];
 
 const downloadFile = async (url, outputPath) => {
   const response = await fetch(url);
@@ -52,6 +62,12 @@ const extractZip = async (zipPath, extractDir) => {
     if (file.type === "Directory") {
       await mkdir(outputPath, { recursive: true });
     } else {
+      // Skip if file is not JavaScript or TypeScript
+      if (
+        !JS_TS_EXTENSIONS.some((ext) => file.path.toLowerCase().endsWith(ext))
+      )
+        continue;
+
       await mkdir(dirname(outputPath), { recursive: true });
       await writeFile(outputPath, file.stream());
     }
