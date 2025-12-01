@@ -33,7 +33,7 @@ const downloadFile = async (url, outputPath) => {
 const grepFunction = async (extractDir) => {
   const { promise, resolve, reject } = Promise.withResolvers();
 
-  const pattern = "(\"aws-sdk\"|\"aws-sdk/|'aws-sdk'|'aws-sdk/)";
+  const pattern = "[\"]aws-sdk(?:/[^\"]*)?[\"]|[\\']aws-sdk(?:/[^\\']*)?[\\']";
   const grep = spawn("grep", ["-rnE", pattern, extractDir]);
 
   let output = "";
