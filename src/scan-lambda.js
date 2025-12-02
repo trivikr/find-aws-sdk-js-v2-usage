@@ -107,7 +107,7 @@ const extractZip = async (zipPath, extractDir) => {
 const scanFunction = async (index, functionName) => {
   const response = await client.getFunction({ FunctionName: functionName });
 
-  const funcDir = join(tempDir, functionName.replace(/[^a-zA-Z0-9]/g, "_"));
+  const funcDir = join(tempDir, functionName);
   const zipPath = join(funcDir, "code.zip");
   const extractDir = join(funcDir, "extracted");
   try {
