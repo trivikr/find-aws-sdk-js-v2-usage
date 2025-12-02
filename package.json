@@ -11,7 +11,7 @@
     "url": "git+https://github.com/trivikr/find-aws-sdk-js-v2-usage.git"
   },
   "keywords": [],
-  "author": "Kamat, Trivikram <trivikr@amazon.com>",
+  "author": "Kamat, Trivikram <trivikr.dev@gmail.com>",
   "license": "MIT",
   "bugs": {
     "url": "https://github.com/trivikr/find-aws-sdk-js-v2-usage/issues"
