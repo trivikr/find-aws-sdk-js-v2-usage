@@ -34,6 +34,15 @@ const downloadFile = async (url, outputPath) => {
 const grepFunction = async (extractDir) => {
   const { promise, resolve, reject } = Promise.withResolvers();
 
+  // This regex pattern matches 'aws-sdk' module imports in both single and double quotes
+  // Pattern breakdown:
+  //  [\"]aws-sdk - matches "aws-sdk literally with double quotes
+  //  (?:/[^\"]*)?  - optionally matches a forward slash followed by any chars except double quote
+  //  [\"] - matches closing double quote
+  //  | - OR
+  //  [\\']aws-sdk - matches 'aws-sdk literally with single quotes
+  //  (?:/[^\\']*)?  - optionally matches a forward slash followed by any chars except single quote
+  //  [\\'] - matches closing single quote
   const pattern = "[\"]aws-sdk(?:/[^\"]*)?[\"]|[\\']aws-sdk(?:/[^\\']*)?[\\']";
   const grep = spawn("grep", ["-rnE", pattern, extractDir]);
 
