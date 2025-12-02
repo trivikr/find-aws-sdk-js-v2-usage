@@ -1,0 +1,25 @@
+{
+  "name": "find-aws-sdk-js-v2-usage",
+  "version": "0.0.1",
+  "description": "Scripts to help find resources which call AWS using JavaScript SDK v2",
+  "main": "index.js",
+  "scripts": {
+    "scan:lambda": "node src/scan-lambda.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/trivikr/find-aws-sdk-js-v2-usage.git"
+  },
+  "keywords": [],
+  "author": "Kamat, Trivikram <trivikr.dev@gmail.com>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/trivikr/find-aws-sdk-js-v2-usage/issues"
+  },
+  "homepage": "https://github.com/trivikr/find-aws-sdk-js-v2-usage#readme",
+  "type": "module",
+  "dependencies": {
+    "@aws-sdk/client-lambda": "^3.942.0",
+    "unzipper": "^0.12.3"
+  }
+}
