@@ -10,16 +10,16 @@ const client = new Lambda();
 const tempDir = await mkdtemp(join(tmpdir(), "lambda-scan-"));
 
 const LAMBDA_LIST_FUNCTION_LIMIT = 50;
-const JS_TS_EXTENSIONS = [
-  ".js",
-  ".jsx",
-  ".ts",
-  ".tsx",
-  ".mjs",
-  ".cjs",
-  ".mts",
-  ".cts",
-];
+
+// Regular expression to match JavaScript and TypeScript file extensions
+// Pattern breakdown:
+// \. - matches literal dot
+// (c|m)? - optionally matches 'c' or 'm' (for .cjs, .mjs files)
+// (j|t) - matches 'j' or 't' (for .js/.ts files)
+// s - matches literal 's'
+// (x)? - optionally matches 'x' (for .jsx/.tsx files)
+// $ - matches end of string
+const JS_TS_EXTENSIONS = /\.(c|m)?(j|t)s(x)?$/;
 
 const downloadFile = async (url, outputPath) => {
   const response = await fetch(url);
@@ -93,10 +93,7 @@ const extractZip = async (zipPath, extractDir) => {
       await mkdir(outputPath, { recursive: true });
     } else {
       // Skip if file is not JavaScript or TypeScript
-      if (
-        !JS_TS_EXTENSIONS.some((ext) => file.path.toLowerCase().endsWith(ext))
-      )
-        continue;
+      if (!JS_TS_EXTENSIONS.test(file.path.toLowerCase())) continue;
 
       await mkdir(dirname(outputPath), { recursive: true });
       await writeFile(outputPath, file.stream());
