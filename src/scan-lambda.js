@@ -12,13 +12,7 @@ const tempDir = await mkdtemp(join(tmpdir(), "lambda-scan-"));
 const LAMBDA_LIST_FUNCTION_LIMIT = 50;
 
 // Regular expression to match JavaScript and TypeScript file extensions
-// Pattern breakdown:
-// \. - matches literal dot
-// (c|m)? - optionally matches 'c' or 'm' (for .cjs, .mjs files)
-// (j|t) - matches 'j' or 't' (for .js/.ts files)
-// s - matches literal 's'
-// (x)? - optionally matches 'x' (for .jsx/.tsx files)
-// $ - matches end of string
+// cjs, mjs, cts, mts, js, ts, jsx, tsx
 const JS_TS_EXTENSIONS = /\.(c|m)?(j|t)s(x)?$/;
 
 const downloadFile = async (url, outputPath) => {
@@ -34,15 +28,9 @@ const downloadFile = async (url, outputPath) => {
 const grepFunction = async (extractDir) => {
   const { promise, resolve, reject } = Promise.withResolvers();
 
-  // This regex pattern matches 'aws-sdk' module imports in both single and double quotes
-  // Pattern breakdown:
-  //  [\"]aws-sdk - matches "aws-sdk literally with double quotes
-  //  (?:/[^\"]*)?  - optionally matches a forward slash followed by any chars except double quote
-  //  [\"] - matches closing double quote
-  //  | - OR
-  //  [\\']aws-sdk - matches 'aws-sdk literally with single quotes
-  //  (?:/[^\\']*)?  - optionally matches a forward slash followed by any chars except single quote
-  //  [\\'] - matches closing single quote
+  // This regex pattern matches single and double quoted string literals such as
+  // those within import statements, accounting for possible deep imports like
+  // "aws-sdk/client/s3". It should specifically not match against imports of "@aws-sdk/*"
   const pattern = "[\"]aws-sdk(?:/[^\"]*)?[\"]|[\\']aws-sdk(?:/[^\\']*)?[\\']";
   const grep = spawn("grep", ["-rnE", pattern, extractDir]);
 
