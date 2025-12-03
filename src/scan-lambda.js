@@ -44,7 +44,7 @@ const scanFunction = async (functionName) => {
   try {
     await mkdir(funcDir, { recursive: true });
     await downloadFile(response.Code.Location, zipPath);
-    const packageJson = await getPackageJsonContents(zipPath, funcDir);
+    const packageJson = await getPackageJsonContents(zipPath);
 
     if (packageJson === null) {
       console.log(`${JS_SDK_V2_MARKER.NA} ${functionName}`);
