@@ -58,7 +58,8 @@ const scanFunction = async (functionName) => {
     for (const packageJsonContent of packageJsonContents) {
       try {
         const packageJson = JSON.parse(packageJsonContent);
-        if (Object.keys(packageJson.dependencies || {}).includes("aws-sdk")) {
+        const dependencies = packageJson.dependencies || {};
+        if ("aws-sdk" in dependencies) {
           console.log(`${JS_SDK_V2_MARKER.Y} ${functionName}`);
           return;
         }
