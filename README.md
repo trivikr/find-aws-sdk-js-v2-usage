@@ -34,7 +34,8 @@ $ npm run scan:lambda
 Note about output:
 - [Y] means "aws-sdk" is found in package.json dependencies and migration is recommended.
 - [N] means "aws-sdk" is not found in package.json dependencies.
-- [N/A] means package.json is not found.
+- [?] means package.json is not found.
+- [X] means failure when parsing package.json.
 
 Reading 2 functions.
 [Y] function-which-imports-js-sdk-v2

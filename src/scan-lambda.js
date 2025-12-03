@@ -9,7 +9,7 @@ const client = new Lambda();
 const tempDir = await mkdtemp(join(tmpdir(), "lambda-scan-"));
 
 const LAMBDA_LIST_FUNCTION_LIMIT = 50;
-const JS_SDK_V2_MARKER = { Y: "[Y]", N: "[N]", NA: "[N/A]" };
+const JS_SDK_V2_MARKER = { Y: "[Y]", N: "[N]", UNKNOWN: "[?]", FAIL: "[X]" };
 const PACKAGE_JSON_FILENAME = "package.json";
 
 const downloadFile = async (url, outputPath) => {
@@ -34,7 +34,7 @@ const getPackageJsonContents = async (zipPath) => {
     if (!file.path.endsWith(PACKAGE_JSON_FILENAME)) continue;
 
     const packageJsonContent = await file.buffer();
-    packageJsonContents.push(JSON.parse(packageJsonContent.toString()));
+    packageJsonContents.push(packageJsonContent.toString());
   }
 
   return packageJsonContents;
@@ -51,14 +51,19 @@ const scanFunction = async (functionName) => {
     const packageJsonContents = await getPackageJsonContents(zipPath);
 
     if (packageJsonContents.length === 0) {
-      console.log(`${JS_SDK_V2_MARKER.NA} ${functionName}`);
+      console.log(`${JS_SDK_V2_MARKER.UNKNOWN} ${functionName}`);
       return;
     }
 
     for (const packageJsonContent of packageJsonContents) {
-      const deps = packageJsonContent.dependencies || {};
-      if (Object.keys(deps).includes("aws-sdk")) {
-        console.log(`${JS_SDK_V2_MARKER.Y} ${functionName}`);
+      try {
+        const packageJson = JSON.parse(packageJsonContent);
+        if (Object.keys(packageJson.dependencies || {}).includes("aws-sdk")) {
+          console.log(`${JS_SDK_V2_MARKER.Y} ${functionName}`);
+          return;
+        }
+      } catch (error) {
+        console.log(`${JS_SDK_V2_MARKER.FAIL} ${functionName}`);
         return;
       }
     }
@@ -95,7 +100,10 @@ console.log(
 console.log(
   `- ${JS_SDK_V2_MARKER.N} means "aws-sdk" is not found in package.json dependencies.`
 );
-console.log(`- ${JS_SDK_V2_MARKER.NA} means package.json is not found.\n`);
+console.log(`- ${JS_SDK_V2_MARKER.UNKNOWN} means package.json is not found.`);
+console.log(
+  `- ${JS_SDK_V2_MARKER.FAIL} means failure when parsing package.json.\n`
+);
 
 console.log(
   `Reading ${functionsLength} function${functionsLength > 1 ? "s" : ""}.`
