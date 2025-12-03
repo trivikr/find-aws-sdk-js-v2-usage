@@ -24,16 +24,20 @@ const downloadFile = async (url, outputPath) => {
 
 const getPackageJsonContents = async (zipPath) => {
   const directory = await unzipper.Open.file(zipPath);
+  const packageJsonContents = [];
 
   for (const file of directory.files) {
+    // Skip 'node_modules' directory, as it's not the customer source code.
+    if (file.path.includes("node_modules/")) continue;
+
     // Skip anything which is not `package.json`
-    if (file.path !== PACKAGE_JSON_FILENAME) continue;
-    const packageJsonContents = await file.buffer();
-    return JSON.parse(packageJsonContents.toString());
+    if (!file.path.endsWith(PACKAGE_JSON_FILENAME)) continue;
+
+    const packageJsonContent = await file.buffer();
+    packageJsonContents.push(JSON.parse(packageJsonContent.toString()));
   }
 
-  // package.json not found.
-  return null;
+  return packageJsonContents;
 };
 
 const scanFunction = async (functionName) => {
@@ -44,18 +48,22 @@ const scanFunction = async (functionName) => {
   try {
     await mkdir(funcDir, { recursive: true });
     await downloadFile(response.Code.Location, zipPath);
-    const packageJson = await getPackageJsonContents(zipPath);
+    const packageJsonContents = await getPackageJsonContents(zipPath);
 
-    if (packageJson === null) {
+    if (packageJsonContents.length === 0) {
       console.log(`${JS_SDK_V2_MARKER.NA} ${functionName}`);
       return;
     }
 
-    const deps = packageJson.dependencies || {};
-    const marker = Object.keys(deps).includes("aws-sdk")
-      ? JS_SDK_V2_MARKER.Y
-      : JS_SDK_V2_MARKER.N;
-    console.log(`${marker} ${functionName}`);
+    for (const packageJsonContent of packageJsonContents) {
+      const deps = packageJsonContent.dependencies || {};
+      if (Object.keys(deps).includes("aws-sdk")) {
+        console.log(`${JS_SDK_V2_MARKER.Y} ${functionName}`);
+        return;
+      }
+    }
+
+    console.log(`${JS_SDK_V2_MARKER.N} ${functionName}`);
   } finally {
     await rm(funcDir, { recursive: true, force: true });
   }
