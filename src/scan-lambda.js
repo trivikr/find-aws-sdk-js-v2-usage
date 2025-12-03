@@ -1,19 +1,16 @@
 import { Lambda, paginateListFunctions } from "@aws-sdk/client-lambda";
 import unzipper from "unzipper";
 
-import { spawn } from "node:child_process";
 import { mkdir, mkdtemp, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
-import { join, dirname } from "node:path";
+import { join } from "node:path";
 
 const client = new Lambda();
 const tempDir = await mkdtemp(join(tmpdir(), "lambda-scan-"));
 
 const LAMBDA_LIST_FUNCTION_LIMIT = 50;
-
-// Regular expression to match JavaScript and TypeScript file extensions
-// cjs, mjs, cts, mts, js, ts, jsx, tsx
-const JS_TS_EXTENSIONS = /\.(c|m)?(j|t)s(x)?$/;
+const JS_SDK_V2_MARKER = { Y: "[Y]", N: "[N]", NA: "[N/A]" };
+const PACKAGE_JSON_FILENAME = "package.json";
 
 const downloadFile = async (url, outputPath) => {
   const response = await fetch(url);
@@ -25,97 +22,40 @@ const downloadFile = async (url, outputPath) => {
   await writeFile(outputPath, response.body);
 };
 
-const grepFunction = async (extractDir) => {
-  const { promise, resolve, reject } = Promise.withResolvers();
-
-  // This regex pattern matches single and double quoted string literals such as
-  // those within import statements, accounting for possible deep imports like
-  // "aws-sdk/client/s3". It should specifically not match against imports of "@aws-sdk/*"
-  const pattern = "[\"]aws-sdk(?:/[^\"]*)?[\"]|[\\']aws-sdk(?:/[^\\']*)?[\\']";
-  const grep = spawn("grep", ["-rnE", pattern, extractDir]);
-
-  let output = "";
-  grep.stdout.on("data", (data) => {
-    const lines = data.toString().split("\n").slice(0, -1);
-    for (const line of lines) {
-      output += line.startsWith(extractDir)
-        ? line.slice(extractDir.length)
-        : line;
-      output += "\n";
-    }
-  });
-
-  grep.on("close", (code) => {
-    if (code === 0 || code === 1) {
-      resolve({ stdout: output });
-    } else {
-      reject(new Error(`grep exited with code ${code}`));
-    }
-  });
-
-  grep.on("error", (error) => {
-    if (error.code === "ENOENT") {
-      reject(
-        new Error(
-          "The 'grep' command was not found. Please ensure 'grep' is installed and available in your PATH. See the README prerequisites section for more information."
-        )
-      );
-    } else {
-      reject(error);
-    }
-  });
-
-  return promise;
-};
-
-const extractZip = async (zipPath, extractDir) => {
+const getPackageJsonContents = async (zipPath) => {
   const directory = await unzipper.Open.file(zipPath);
 
   for (const file of directory.files) {
-    // Skip 'node_modules' directory, as it's not the customer source code.
-    if (file.path.includes("node_modules/")) continue;
-
-    const outputPath = join(extractDir, file.path);
-
-    if (file.type === "Directory") {
-      await mkdir(outputPath, { recursive: true });
-    } else {
-      // Skip if file is not JavaScript or TypeScript
-      if (!JS_TS_EXTENSIONS.test(file.path.toLowerCase())) continue;
-
-      await mkdir(dirname(outputPath), { recursive: true });
-      await writeFile(outputPath, file.stream());
-    }
+    // Skip anything which is not `package.json`
+    if (file.path !== PACKAGE_JSON_FILENAME) continue;
+    const packageJsonContents = await file.buffer();
+    return JSON.parse(packageJsonContents.toString());
   }
+
+  // package.json not found.
+  return null;
 };
 
-const scanFunction = async (index, functionName) => {
+const scanFunction = async (functionName) => {
   const response = await client.getFunction({ FunctionName: functionName });
 
   const funcDir = join(tempDir, functionName);
   const zipPath = join(funcDir, "code.zip");
-  const extractDir = join(funcDir, "extracted");
   try {
-    await mkdir(extractDir, { recursive: true });
+    await mkdir(funcDir, { recursive: true });
     await downloadFile(response.Code.Location, zipPath);
-    await extractZip(zipPath, extractDir);
+    const packageJson = await getPackageJsonContents(zipPath, funcDir);
 
-    const { stdout } = await grepFunction(extractDir);
-
-    if (stdout) {
-      const count = (stdout.match(/\n/g) || []).length;
-      console.log(
-        `${index}. Function '${functionName}' has ${count} aws-sdk references:`
-      );
-      for (const line of stdout.trim().split("\n")) {
-        console.log(`- ${line}`);
-      }
-      console.log();
-    } else {
-      console.log(
-        `${index}. Function '${functionName}' has no aws-sdk references.\n`
-      );
+    if (packageJson === null) {
+      console.log(`${JS_SDK_V2_MARKER.NA} ${functionName}`);
+      return;
     }
+
+    const deps = packageJson.dependencies || {};
+    const marker = Object.keys(deps).includes("aws-sdk")
+      ? JS_SDK_V2_MARKER.Y
+      : JS_SDK_V2_MARKER.N;
+    console.log(`${marker} ${functionName}`);
   } finally {
     await rm(funcDir, { recursive: true, force: true });
   }
@@ -140,16 +80,25 @@ if (listFunctionsLength >= LAMBDA_LIST_FUNCTION_LIMIT) {
 }
 
 const functionsLength = functions.length;
+console.log(`Note about output:`);
 console.log(
-  `Reading ${functionsLength} function${functionsLength > 1 ? "s" : ""}.\n`
+  `- ${JS_SDK_V2_MARKER.Y} means "aws-sdk" is found in package.json dependencies and migration is recommended.`
+);
+console.log(
+  `- ${JS_SDK_V2_MARKER.N} means "aws-sdk" is not found in package.json dependencies.`
+);
+console.log(`- ${JS_SDK_V2_MARKER.NA} means package.json is not found.\n`);
+
+console.log(
+  `Reading ${functionsLength} function${functionsLength > 1 ? "s" : ""}.`
 );
 
 try {
-  for (let i = 0; i < functionsLength; i++) {
-    await scanFunction(i + 1, functions[i]);
+  for (const functionName of functions) {
+    await scanFunction(functionName);
   }
 } finally {
   await rm(tempDir, { recursive: true, force: true });
 }
 
-console.log("Done.");
+console.log("\nDone.");
