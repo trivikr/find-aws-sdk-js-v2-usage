@@ -10,7 +10,6 @@ Scripts to help find resources which call AWS using JavaScript SDK v2
   1. Verify that node is installed by running `node -v` in a terminal window and confirm that it shows Node.js >=24, such as `v24.11.0`).
 - Install dependencies by running `npm install`.
 - Set up [SDK authentication with AWS][] with the required permissions for the task.
-- Install [grep][] used for searching.
 
 ## JS SDK usage in AWS Lambda
 
@@ -32,14 +31,15 @@ $ npm run scan:lambda
 
 ...
 
+Note about output:
+- [Y] means "aws-sdk" is found in package.json dependencies and migration is recommended.
+- [N] means "aws-sdk" is not found in package.json dependencies.
+- [?] means package.json is not found.
+- [X] means failure when parsing package.json.
+
 Reading 2 functions.
-
-1. Function 'function-which-imports-js-sdk-v2' has 3 aws-sdk references:
-- /double-quotes.mjs:1:import AWS from "aws-sdk";
-- /single-quotes.mjs:1:import AWS from 'aws-sdk';
-- /deep-import.mjs:1:import DynamoDB from "aws-sdk/clients/dynamodb";
-
-2. Function 'function-which-imports-js-sdk-v3' has no aws-sdk references.
+[Y] function-which-imports-js-sdk-v2
+[N] function-which-imports-js-sdk-v3
 
 Done.
 ```
