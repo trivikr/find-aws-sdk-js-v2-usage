@@ -1,7 +1,11 @@
 import type { Lambda } from "@aws-sdk/client-lambda";
-import { JS_SDK_V2_MARKER } from "./constants.ts";
+import { JS_SDK_V2, JS_SDK_V2_MARKER } from "./constants.ts";
 import { downloadFile } from "./utils/downloadFile.ts";
-import { getPackageJsonContents } from "./utils/getPackageJsonContents.ts";
+import {
+  getLambdaFunctionContents,
+  type LambdaFunctionContents,
+} from "./utils/getLambdaFunctionContents.ts";
+import { hasSdkV2InBundle } from "./utils/hasSdkV2InBundle.ts";
 
 import { rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
@@ -20,34 +24,39 @@ export const scanLambdaFunction = async (
   }
   const zipPath = join(tmpdir(), `${functionName}.zip`);
 
-  let packageJsonContents;
+  let lambdaFunctionContents: LambdaFunctionContents;
   try {
     await downloadFile(response.Code.Location, zipPath);
-    packageJsonContents = await getPackageJsonContents(zipPath);
+    lambdaFunctionContents = await getLambdaFunctionContents(zipPath);
   } finally {
     await rm(zipPath, { force: true });
   }
 
-  if (packageJsonContents.length === 0) {
-    console.log(
-      `${JS_SDK_V2_MARKER.UNKNOWN} ${functionName}: package.json not found.`
-    );
-    return;
-  }
+  const { packageJsonContents, bundleContent } = lambdaFunctionContents;
 
-  for (const packageJsonContent of packageJsonContents) {
-    try {
-      const packageJson = JSON.parse(packageJsonContent);
-      const dependencies = packageJson.dependencies || {};
-      if ("aws-sdk" in dependencies) {
-        console.log(`${JS_SDK_V2_MARKER.Y} ${functionName}`);
+  // Search for "aws-sdk" in package.json dependencies if present.
+  if (packageJsonContents && packageJsonContents.length > 0) {
+    for (const packageJsonContent of packageJsonContents) {
+      try {
+        const packageJson = JSON.parse(packageJsonContent);
+        const dependencies = packageJson.dependencies || {};
+        if (JS_SDK_V2 in dependencies) {
+          console.log(`${JS_SDK_V2_MARKER.Y} ${functionName}`);
+          return;
+        }
+      } catch (error) {
+        console.log(`${JS_SDK_V2_MARKER.FAIL} ${functionName}`);
         return;
       }
-    } catch (error) {
-      console.log(`${JS_SDK_V2_MARKER.FAIL} ${functionName}`);
-      return;
     }
   }
 
+  // Search for import of "aws-sdk" in bundle, if package.json is not present.
+  if (bundleContent && hasSdkV2InBundle(bundleContent)) {
+    console.log(`${JS_SDK_V2_MARKER.Y} ${functionName}`);
+    return;
+  }
+
+  // "aws-sdk" dependency/reference not found.
   console.log(`${JS_SDK_V2_MARKER.N} ${functionName}`);
 };
