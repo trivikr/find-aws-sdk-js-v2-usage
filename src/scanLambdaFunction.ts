@@ -12,18 +12,26 @@ export const scanLambdaFunction = async (
   functionName: string
 ) => {
   const response = await client.getFunction({ FunctionName: functionName });
+  if (!response.Code?.Location) {
+    console.log(
+      `${JS_SDK_V2_MARKER.UNKNOWN} ${functionName}: Code location not found.`
+    );
+    return;
+  }
   const zipPath = join(tmpdir(), `${functionName}.zip`);
 
   let packageJsonContents;
   try {
-    await downloadFile(response.Code!.Location!, zipPath);
+    await downloadFile(response.Code.Location, zipPath);
     packageJsonContents = await getPackageJsonContents(zipPath);
   } finally {
     await rm(zipPath, { force: true });
   }
 
   if (packageJsonContents.length === 0) {
-    console.log(`${JS_SDK_V2_MARKER.UNKNOWN} ${functionName}`);
+    console.log(
+      `${JS_SDK_V2_MARKER.UNKNOWN} ${functionName}: package.json not found.`
+    );
     return;
   }
 
