@@ -1,7 +1,7 @@
 import unzipper from "unzipper";
 const PACKAGE_JSON_FILENAME = "package.json";
 
-export const getPackageJsonContents = async (zipPath) => {
+export const getPackageJsonContents = async (zipPath: string) => {
   const directory = await unzipper.Open.file(zipPath);
   const packageJsonContents = [];
 

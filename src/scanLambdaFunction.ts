@@ -1,13 +1,23 @@
-import { JS_SDK_V2_MARKER } from "./constants.js";
-import { downloadFile } from "./utils/downloadFile.js";
-import { getPackageJsonContents } from "./utils/getPackageJsonContents.js";
+import type { Lambda } from "@aws-sdk/client-lambda";
+import { JS_SDK_V2_MARKER } from "./constants.ts";
+import { downloadFile } from "./utils/downloadFile.ts";
+import { getPackageJsonContents } from "./utils/getPackageJsonContents.ts";
 
 import { rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 
-export const scanLambdaFunction = async (client, functionName) => {
+export const scanLambdaFunction = async (
+  client: Lambda,
+  functionName: string
+) => {
   const response = await client.getFunction({ FunctionName: functionName });
+  if (!response.Code?.Location) {
+    console.log(
+      `${JS_SDK_V2_MARKER.UNKNOWN} ${functionName}: Code location not found.`
+    );
+    return;
+  }
   const zipPath = join(tmpdir(), `${functionName}.zip`);
 
   let packageJsonContents;
@@ -19,7 +29,9 @@ export const scanLambdaFunction = async (client, functionName) => {
   }
 
   if (packageJsonContents.length === 0) {
-    console.log(`${JS_SDK_V2_MARKER.UNKNOWN} ${functionName}`);
+    console.log(
+      `${JS_SDK_V2_MARKER.UNKNOWN} ${functionName}: package.json not found.`
+    );
     return;
   }
 

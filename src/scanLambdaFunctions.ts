@@ -1,15 +1,24 @@
-import { Lambda, paginateListFunctions } from "@aws-sdk/client-lambda";
+import {
+  Lambda,
+  paginateListFunctions,
+  type FunctionConfiguration,
+} from "@aws-sdk/client-lambda";
 
-import { JS_SDK_V2_MARKER, LAMBDA_LIST_FUNCTION_LIMIT } from "./constants.js";
-import { scanLambdaFunction } from "./scanLambdaFunction.js";
+import { JS_SDK_V2_MARKER, LAMBDA_LIST_FUNCTION_LIMIT } from "./constants.ts";
+import { scanLambdaFunction } from "./scanLambdaFunction.ts";
 
 import { fileURLToPath } from "node:url";
 
 const client = new Lambda();
 
+const getFunctioNames = (functions: FunctionConfiguration[] | undefined) =>
+  (functions ?? [])
+    .map((f) => f.FunctionName)
+    .filter((fn): fn is string => fn !== undefined);
+
 const scanLambdaFunctions = async () => {
   const response = await client.listFunctions();
-  const functions = response.Functions.map((f) => f.FunctionName);
+  const functions = getFunctioNames(response.Functions);
 
   const listFunctionsLength = functions.length;
   if (listFunctionsLength === 0) {
@@ -22,7 +31,7 @@ const scanLambdaFunctions = async () => {
 
     const paginator = paginateListFunctions({ client }, {});
     for await (const page of paginator) {
-      functions.push(...page.Functions.map((f) => f.FunctionName));
+      functions.push(...getFunctioNames(page.Functions));
     }
   }
 
@@ -34,7 +43,9 @@ const scanLambdaFunctions = async () => {
   console.log(
     `- ${JS_SDK_V2_MARKER.N} means "aws-sdk" is not found in package.json dependencies.`
   );
-  console.log(`- ${JS_SDK_V2_MARKER.UNKNOWN} means package.json is not found.`);
+  console.log(
+    `- ${JS_SDK_V2_MARKER.UNKNOWN} means script was not able to proceed, and it emits reason.`
+  );
   console.log(
     `- ${JS_SDK_V2_MARKER.FAIL} means failure when parsing package.json.\n`
   );
