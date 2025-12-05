@@ -4,7 +4,7 @@
   "description": "Scripts to help find resources which call AWS using JavaScript SDK v2",
   "main": "index.js",
   "scripts": {
-    "scan:lambda": "node src/scan-lambda.js"
+    "scan:lambda": "node src/scanLambdaFunctions.js"
   },
   "repository": {
     "type": "git",
