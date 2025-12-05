@@ -7,5 +7,9 @@ export const downloadFile = async (url: string, outputPath: string) => {
     throw new Error(`Failed to download: ${response.statusText}`);
   }
 
-  await writeFile(outputPath, response.body!);
+  if (!response.body) {
+    throw new Error(`Response body is null for URL ${url}`);
+  }
+
+  await writeFile(outputPath, response.body);
 };
