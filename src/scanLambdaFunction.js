@@ -10,9 +10,13 @@ export const scanLambdaFunction = async (client, functionName) => {
   const response = await client.getFunction({ FunctionName: functionName });
   const zipPath = join(tmpdir(), `${functionName}.zip`);
 
-  await downloadFile(response.Code.Location, zipPath);
-  const packageJsonContents = await getPackageJsonContents(zipPath);
-  await rm(zipPath);
+  let packageJsonContents;
+  try {
+    await downloadFile(response.Code.Location, zipPath);
+    packageJsonContents = await getPackageJsonContents(zipPath);
+  } finally {
+    await rm(zipPath, { force: true });
+  }
 
   if (packageJsonContents.length === 0) {
     console.log(`${JS_SDK_V2_MARKER.UNKNOWN} ${functionName}`);
