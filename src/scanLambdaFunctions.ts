@@ -4,7 +4,7 @@ import {
   type FunctionConfiguration,
 } from "@aws-sdk/client-lambda";
 
-import { JS_SDK_V2_MARKER, LAMBDA_LIST_FUNCTIONS_LIMIT } from "./constants.ts";
+import { JS_SDK_V2_MARKER } from "./constants.ts";
 import { scanLambdaFunction } from "./scanLambdaFunction.ts";
 
 import { fileURLToPath } from "node:url";
@@ -19,7 +19,7 @@ const getNodeJsFunctionNames = (
     .map((fn) => fn.FunctionName)
     .filter((fnName): fnName is string => fnName !== undefined);
 
-const getNodeJsFunctionNamesUsingPagination = async (client: Lambda) => {
+const scanLambdaFunctions = async () => {
   const functions: string[] = [];
 
   const paginator = paginateListFunctions({ client }, {});
@@ -27,22 +27,11 @@ const getNodeJsFunctionNamesUsingPagination = async (client: Lambda) => {
     functions.push(...getNodeJsFunctionNames(page.Functions));
   }
 
-  return functions;
-};
-
-const scanLambdaFunctions = async () => {
-  const response = await client.listFunctions();
-
-  const listFunctionsLength = response.Functions?.length ?? 0;
-  if (response.Functions?.length === 0) {
+  const listFunctionsLength = functions.length ?? 0;
+  if (listFunctionsLength === 0) {
     console.log("No functions found.");
     process.exit(0);
   }
-
-  const functions =
-    listFunctionsLength >= LAMBDA_LIST_FUNCTIONS_LIMIT
-      ? await getNodeJsFunctionNamesUsingPagination(client)
-      : getNodeJsFunctionNames(response.Functions);
 
   const functionsLength = functions.length;
   console.log(`Note about output:`);
