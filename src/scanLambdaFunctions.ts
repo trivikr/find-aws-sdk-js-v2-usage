@@ -1,7 +1,7 @@
 import { Lambda, paginateListFunctions } from "@aws-sdk/client-lambda";
 
-import { JS_SDK_V2_MARKER, LAMBDA_LIST_FUNCTION_LIMIT } from "./constants.js";
-import { scanLambdaFunction } from "./scanLambdaFunction.js";
+import { JS_SDK_V2_MARKER, LAMBDA_LIST_FUNCTION_LIMIT } from "./constants.ts";
+import { scanLambdaFunction } from "./scanLambdaFunction.ts";
 
 import { fileURLToPath } from "node:url";
 
@@ -9,7 +9,7 @@ const client = new Lambda();
 
 const scanLambdaFunctions = async () => {
   const response = await client.listFunctions();
-  const functions = response.Functions.map((f) => f.FunctionName);
+  const functions = response.Functions!.map((f) => f.FunctionName);
 
   const listFunctionsLength = functions.length;
   if (listFunctionsLength === 0) {
@@ -22,7 +22,7 @@ const scanLambdaFunctions = async () => {
 
     const paginator = paginateListFunctions({ client }, {});
     for await (const page of paginator) {
-      functions.push(...page.Functions.map((f) => f.FunctionName));
+      functions.push(...page.Functions!.map((f) => f.FunctionName));
     }
   }
 
@@ -43,7 +43,7 @@ const scanLambdaFunctions = async () => {
     `Reading ${functionsLength} function${functionsLength > 1 ? "s" : ""}.`
   );
 
-  for (const functionName of functions) {
+  for (const functionName of functions.filter((fn) => fn !== undefined)) {
     await scanLambdaFunction(client, functionName);
   }
 

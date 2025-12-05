@@ -4,7 +4,8 @@
   "description": "Scripts to help find resources which call AWS using JavaScript SDK v2",
   "main": "index.js",
   "scripts": {
-    "scan:lambda": "node src/scanLambdaFunctions.js"
+    "build": "tsc",
+    "scan:lambda": "node src/scanLambdaFunctions.ts"
   },
   "repository": {
     "type": "git",
@@ -21,5 +22,12 @@
   "dependencies": {
     "@aws-sdk/client-lambda": "^3.942.0",
     "unzipper": "^0.12.3"
+  },
+  "devDependencies": {
+    "@tsconfig/node-ts": "^23.6.2",
+    "@tsconfig/node24": "^24.0.3",
+    "@types/node": "^24.10.1",
+    "@types/unzipper": "^0.10.11",
+    "typescript": "^5.9.3"
   }
 }
