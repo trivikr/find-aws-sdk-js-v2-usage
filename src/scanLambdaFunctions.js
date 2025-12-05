@@ -3,6 +3,8 @@ import { Lambda, paginateListFunctions } from "@aws-sdk/client-lambda";
 import { JS_SDK_V2_MARKER, LAMBDA_LIST_FUNCTION_LIMIT } from "./constants.js";
 import { scanLambdaFunction } from "./scanLambdaFunction.js";
 
+import { fileURLToPath } from "node:url";
+
 const client = new Lambda();
 
 const scanLambdaFunctions = async () => {
@@ -48,6 +50,6 @@ const scanLambdaFunctions = async () => {
   console.log("\nDone.");
 };
 
-if (import.meta.url === `file://${process.argv[1]}`) {
+if (fileURLToPath(import.meta.url) === process.argv[1]) {
   scanLambdaFunctions();
 }
