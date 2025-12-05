@@ -27,7 +27,7 @@ const scanLambdaFunctions = async () => {
     functions.push(...getNodeJsFunctionNames(page.Functions));
   }
 
-  const listFunctionsLength = functions.length ?? 0;
+  const listFunctionsLength = functions.length;
   if (listFunctionsLength === 0) {
     console.log("No functions found.");
     process.exit(0);
