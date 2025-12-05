@@ -22,7 +22,7 @@ const scanLambdaFunctions = async () => {
 
     const paginator = paginateListFunctions({ client }, {});
     for await (const page of paginator) {
-      functions.push(...page.Functions!.map((f) => f.FunctionName));
+      functions.push(...(page.Functions ?? []).map((f) => f.FunctionName));
     }
   }
 
