@@ -4,36 +4,45 @@ import {
   type FunctionConfiguration,
 } from "@aws-sdk/client-lambda";
 
-import { JS_SDK_V2_MARKER, LAMBDA_LIST_FUNCTION_LIMIT } from "./constants.ts";
+import { JS_SDK_V2_MARKER, LAMBDA_LIST_FUNCTIONS_LIMIT } from "./constants.ts";
 import { scanLambdaFunction } from "./scanLambdaFunction.ts";
 
 import { fileURLToPath } from "node:url";
 
 const client = new Lambda();
 
-const getFunctioNames = (functions: FunctionConfiguration[] | undefined) =>
+const getNodeJsFunctionNames = (
+  functions: FunctionConfiguration[] | undefined
+) =>
   (functions ?? [])
-    .map((f) => f.FunctionName)
-    .filter((fn): fn is string => fn !== undefined);
+    .filter((fn) => fn.Runtime?.startsWith("nodejs"))
+    .map((fn) => fn.FunctionName)
+    .filter((fnName): fnName is string => fnName !== undefined);
+
+const getNodeJsFunctionNamesUsingPagination = async (client: Lambda) => {
+  const functions: string[] = [];
+
+  const paginator = paginateListFunctions({ client }, {});
+  for await (const page of paginator) {
+    functions.push(...getNodeJsFunctionNames(page.Functions));
+  }
+
+  return functions;
+};
 
 const scanLambdaFunctions = async () => {
   const response = await client.listFunctions();
-  const functions = getFunctioNames(response.Functions);
 
-  const listFunctionsLength = functions.length;
-  if (listFunctionsLength === 0) {
+  const listFunctionsLength = response.Functions?.length ?? 0;
+  if (response.Functions?.length === 0) {
     console.log("No functions found.");
     process.exit(0);
   }
 
-  if (listFunctionsLength >= LAMBDA_LIST_FUNCTION_LIMIT) {
-    functions.length = 0;
-
-    const paginator = paginateListFunctions({ client }, {});
-    for await (const page of paginator) {
-      functions.push(...getFunctioNames(page.Functions));
-    }
-  }
+  const functions =
+    listFunctionsLength >= LAMBDA_LIST_FUNCTIONS_LIMIT
+      ? await getNodeJsFunctionNamesUsingPagination(client)
+      : getNodeJsFunctionNames(response.Functions);
 
   const functionsLength = functions.length;
   console.log(`Note about output:`);
