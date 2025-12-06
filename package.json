@@ -5,7 +5,8 @@
   "main": "index.js",
   "scripts": {
     "build": "tsc",
-    "scan:lambda": "node src/scanLambdaFunctions.ts"
+    "scan:lambda": "node src/scanLambdaFunctions.ts",
+    "test": "vitest"
   },
   "repository": {
     "type": "git",
@@ -28,6 +29,7 @@
     "@tsconfig/node24": "^24.0.3",
     "@types/node": "^24.10.1",
     "@types/unzipper": "^0.10.11",
-    "typescript": "^5.9.3"
+    "typescript": "^5.9.3",
+    "vitest": "^4.0.15"
   }
 }
