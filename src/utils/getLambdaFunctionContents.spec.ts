@@ -26,7 +26,7 @@ describe(getLambdaFunctionContents.name, () => {
     expect(result).toEqual({ bundleContent: mockBundle });
   });
 
-  it("returns empty packageJsonContents when no package.json or index.js", async () => {
+  it("returns empty object when no package.json or index.js", async () => {
     const mockFiles = [
       {
         type: "File",
