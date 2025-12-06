@@ -6,7 +6,7 @@
   "scripts": {
     "build": "tsc",
     "scan:lambda": "node src/scanLambdaFunctions.ts",
-    "test": "vitest"
+    "test": "vitest src/**/*.spec.ts"
   },
   "repository": {
     "type": "git",
