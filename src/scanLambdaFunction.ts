@@ -51,7 +51,7 @@ export const scanLambdaFunction = async (
     }
   }
 
-  // Search for import of "aws-sdk" in bundle, if package.json is not present.
+  // Search for import of "aws-sdk" in bundle, if not found in package.json dependencies.
   if (bundleContent && hasSdkV2InBundle(bundleContent)) {
     console.log(`${JS_SDK_V2_MARKER.Y} ${functionName}`);
     return;
