@@ -8,7 +8,7 @@ export type LambdaFunctionContents = {
   packageJsonContents?: string[];
 
   /**
-   * String contents of the bundle, if there's a single file.
+   * String contents of the index.js bundle file, if present.
    */
   bundleContent?: string;
 };
