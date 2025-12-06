@@ -7,22 +7,43 @@ vi.mock("unzipper");
 describe(getLambdaFunctionContents.name, () => {
   const mockZipPath = "/path/to/file.zip";
   const mockPackageJson = '{"name":"test"}';
+  const mockBundle = "bundle content";
 
-  it("returns bundleContent for single file", async () => {
+  it("returns bundleContent for index.js when package.json not present", async () => {
     const mockFiles = [
       {
         type: "File",
-        buffer: vi.fn().mockResolvedValue(Buffer.from("bundle content")),
+        path: "index.js",
+        buffer: vi.fn().mockResolvedValue(Buffer.from(mockBundle)),
       },
     ];
-    vi.mocked(unzipper.Open.file).mockResolvedValue({ files: mockFiles } as any);
+    vi.mocked(unzipper.Open.file).mockResolvedValue({
+      files: mockFiles,
+    } as any);
 
     const result = await getLambdaFunctionContents(mockZipPath);
 
-    expect(result).toEqual({ bundleContent: "bundle content" });
+    expect(result).toEqual({ bundleContent: mockBundle });
   });
 
-  it("returns packageJsonContents for multiple files", async () => {
+  it("returns empty packageJsonContents when no package.json or index.js", async () => {
+    const mockFiles = [
+      {
+        type: "File",
+        path: "other.js",
+        buffer: vi.fn(),
+      },
+    ];
+    vi.mocked(unzipper.Open.file).mockResolvedValue({
+      files: mockFiles,
+    } as any);
+
+    const result = await getLambdaFunctionContents(mockZipPath);
+
+    expect(result).toEqual({});
+  });
+
+  it("returns packageJsonContents when package.json present", async () => {
     const mockFiles = [
       {
         type: "File",
@@ -35,7 +56,9 @@ describe(getLambdaFunctionContents.name, () => {
         buffer: vi.fn(),
       },
     ];
-    vi.mocked(unzipper.Open.file).mockResolvedValue({ files: mockFiles } as any);
+    vi.mocked(unzipper.Open.file).mockResolvedValue({
+      files: mockFiles,
+    } as any);
 
     const result = await getLambdaFunctionContents(mockZipPath);
 
@@ -55,7 +78,9 @@ describe(getLambdaFunctionContents.name, () => {
         buffer: vi.fn().mockResolvedValue(Buffer.from(mockPackageJson)),
       },
     ];
-    vi.mocked(unzipper.Open.file).mockResolvedValue({ files: mockFiles } as any);
+    vi.mocked(unzipper.Open.file).mockResolvedValue({
+      files: mockFiles,
+    } as any);
 
     const result = await getLambdaFunctionContents(mockZipPath);
 
@@ -76,10 +101,14 @@ describe(getLambdaFunctionContents.name, () => {
         buffer: vi.fn().mockResolvedValue(Buffer.from('{"name":"app"}')),
       },
     ];
-    vi.mocked(unzipper.Open.file).mockResolvedValue({ files: mockFiles } as any);
+    vi.mocked(unzipper.Open.file).mockResolvedValue({
+      files: mockFiles,
+    } as any);
 
     const result = await getLambdaFunctionContents(mockZipPath);
 
-    expect(result).toEqual({ packageJsonContents: ['{"name":"root"}', '{"name":"app"}'] });
+    expect(result).toEqual({
+      packageJsonContents: ['{"name":"root"}', '{"name":"app"}'],
+    });
   });
 });

@@ -18,16 +18,7 @@ export const getLambdaFunctionContents = async (
 ): Promise<LambdaFunctionContents> => {
   const directory = await unzipper.Open.file(zipPath);
 
-  const files = directory.files.filter((f) => f.type === "File");
-  if (files.length === 1) {
-    // Lambda function contains a single bundle. Return it.
-    const file = files[0];
-    const bundleContent = await file.buffer();
-    return { bundleContent: bundleContent.toString() };
-  }
-
   const packageJsonContents = [];
-
   for (const file of directory.files) {
     // Skip 'node_modules' directory, as it's not the customer source code.
     if (file.path.includes("node_modules/")) continue;
@@ -39,5 +30,17 @@ export const getLambdaFunctionContents = async (
     packageJsonContents.push(packageJsonContent.toString());
   }
 
-  return { packageJsonContents };
+  if (packageJsonContents.length !== 0) {
+    return { packageJsonContents };
+  }
+
+  const indexFile = directory.files.find(
+    (f) => f.path === "index.js" && f.type === "File"
+  );
+  if (indexFile) {
+    const bundleContent = await indexFile.buffer();
+    return { bundleContent: bundleContent.toString() };
+  }
+
+  return {};
 };
