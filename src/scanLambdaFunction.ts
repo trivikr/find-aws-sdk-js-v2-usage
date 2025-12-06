@@ -45,8 +45,7 @@ export const scanLambdaFunction = async (
           return;
         }
       } catch (error) {
-        console.log(`${JS_SDK_V2_MARKER.FAIL} ${functionName}`);
-        return;
+        // Parsing failure for package.json which is rare, continue.
       }
     }
   }
