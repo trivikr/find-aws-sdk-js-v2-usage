@@ -1,5 +1,5 @@
-import { STS } from "@aws-sdk/client-sts";
+import { STSClient, GetCallerIdentityCommand } from "@aws-sdk/client-sts";
 
-const client = new STS();
+const client = new STSClient();
 
-export const handler = async () => client.getCallerIdentity();
+export const handler = async () => client.send(new GetCallerIdentityCommand());
