@@ -1,48 +1,39 @@
-import { JS_SDK_V2 } from "../constants.ts";
-
-const SDK_V2_REGEX_PATTERNS = [
-  // 1. CommonJS require (Webpack, Browserify, Parcel)
-  new RegExp(`require\\s*\\(\\s*['"\`]${JS_SDK_V2}['"\`]\\s*\\)`, "g"),
-
-  // 2. ES6 import statements
-  new RegExp(`import\\s+.*?from\\s+['"\`]${JS_SDK_V2}['"\`]`, "g"),
-  new RegExp(`import\\s*\\(\\s*['"\`]${JS_SDK_V2}['"\`]\\s*\\)`, "g"),
-
-  // 3. Webpack-style module definitions
-  new RegExp(`['"\`]${JS_SDK_V2}['"\`]\\s*:\\s*function`, "g"),
-
-  // 4. AMD/RequireJS (sometimes used by bundlers)
-  new RegExp(`define\\s*\\([^)]*['"\`]${JS_SDK_V2}['"\`]`, "g"),
-
-  // 5. Export statements
-  new RegExp(`export\\s+.*?from\\s+['"\`]${JS_SDK_V2}['"\`]`, "g"),
-
-  // 6. Dynamic imports with template literals
-  new RegExp(`import\\s*\\(\\s*\`${JS_SDK_V2}\`\\s*\\)`, "g"),
-
-  // 7. Webpack module map (numeric IDs)
-  new RegExp(`/\\*!?\\s*${JS_SDK_V2}\\s*\\*/`, "g"),
-
-  // 8. UMD pattern
-  new RegExp(
-    `['"\`]${JS_SDK_V2}['"\`]\\s*,\\s*\\w+\\[['"\`]${JS_SDK_V2}['"\`]\\]`,
-    "g"
-  ),
-
-  // 9. System.register format (SystemJS)
-  new RegExp(`System\\.register\\s*\\([^)]*['"\`]${JS_SDK_V2}['"\`]`, "g"),
-
-  // 10. Rollup/esbuild style with quotes in object keys
-  new RegExp(`['"\`]${JS_SDK_V2}['"\`]\\s*:\\s*\\{`, "g"),
+const AWS_SDK_ENV_VARS = [
+  "AWS_CONFIG_FILE",
+  "AWS_CONTAINER_AUTHORIZATION_TOKEN",
+  "AWS_CONTAINER_AUTHORIZATION_TOKEN_FILE",
+  "AWS_CONTAINER_CREDENTIALS_RELATIVE_URI",
+  "AWS_CONTAINER_CREDENTIALS_FULL_URI",
+  "AWS_CSM_CLIENT_ID", // v3 doesn't support CSM
+  "AWS_CSM_ENABLED", // v3 doesn't support CSM
+  "AWS_CSM_HOST", // v3 doesn't support CSM
+  "AWS_CSM_PORT", // v3 doesn't support CSM
+  "AWS_EC2_METADATA_DISABLED",
+  "AWS_EC2_METADATA_SERVICE_ENDPOINT",
+  "AWS_EC2_METADATA_SERVICE_ENDPOINT_MODE",
+  // "AWS_EC2_METADATA_V1_DISABLED", // Added in Nov'23 https://github.com/aws/aws-sdk-js/pull/4517
+  "AWS_ENABLE_ENDPOINT_DISCOVERY",
+  "AWS_ENDPOINT_DISCOVERY_ENABLED",
+  "AWS_EXECUTION_ENV",
+  // "AWS_LAMBDA_FUNCTION_NAME", // Added in May'22 https://github.com/aws/aws-sdk-js/pull/4111
+  "AWS_NODEJS_CONNECTION_REUSE_ENABLED", // v3 enabled connection reuse by default.
+  "AWS_PROFILE",
+  "AWS_REGION",
+  "AWS_ROLE_ARN",
+  "AWS_ROLE_SESSION_NAME",
+  "AWS_SDK_LOAD_CONFIG", // v3 loads config by default
+  "AWS_SHARED_CREDENTIALS_FILE",
+  "AWS_STS_REGIONAL_ENDPOINTS",
+  // "AWS_USE_DUALSTACK_ENDPOINT", // Added in Nov'21 https://github.com/aws/aws-sdk-js/pull/3957
+  // "AWS_USE_FIPS_ENDPOINT", // Added in Nov'21 https://github.com/aws/aws-sdk-js/pull/3951
+  "AWS_WEB_IDENTITY_TOKEN_FILE",
 ];
 
 export const hasSdkV2InBundle = (bundleContent: string): boolean => {
-  for (const SDK_V2_REGEX_PATTERN of SDK_V2_REGEX_PATTERNS) {
-    const matches = bundleContent.match(SDK_V2_REGEX_PATTERN);
-    if (matches && matches.length > 0) {
-      return true;
+  for (let envVar of AWS_SDK_ENV_VARS) {
+    if (!bundleContent.includes(envVar)) {
+      return false;
     }
   }
-
-  return false;
+  return true;
 };
