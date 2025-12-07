@@ -7,5 +7,5 @@
     "rootDir": "src",
     "outDir": "dist"
   },
-  "exclude": ["vitest.config.ts"]
+  "exclude": ["vitest.config.ts", "**/*.spec.ts"]
 }
