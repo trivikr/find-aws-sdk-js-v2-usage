@@ -6,6 +6,7 @@ const outputPath = join(import.meta.dirname, "src", "utils", "__fixtures__");
 
 export default {
   target: "node",
+  mode: "production",
   output: {
     path: outputPath,
   },
