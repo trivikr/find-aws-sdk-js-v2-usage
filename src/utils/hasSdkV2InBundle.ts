@@ -1,32 +1,32 @@
 const AWS_SDK_ENV_VARS = [
   "AWS_CONFIG_FILE",
-  // "AWS_CONTAINER_AUTHORIZATION_TOKEN", // Tree shaked by esbuild
-  // "AWS_CONTAINER_AUTHORIZATION_TOKEN_FILE", // Tree shaked by esbuild
-  // "AWS_CONTAINER_CREDENTIALS_RELATIVE_URI", // Tree shaked by esbuild
-  // "AWS_CONTAINER_CREDENTIALS_FULL_URI", // Tree shaked by esbuild
-  // "AWS_CSM_CLIENT_ID", // v3 doesn't support CSM. Tree shaked by esbuild.
-  // "AWS_CSM_ENABLED", // v3 doesn't support CSM. Tree shaked by esbuild.
-  // "AWS_CSM_HOST", // v3 doesn't support CSM. Tree shaked by esbuild.
-  // "AWS_CSM_PORT", // v3 doesn't support CSM. Tree shaked by esbuild.
-  // "AWS_EC2_METADATA_DISABLED", // Tree shaked by esbuild
-  // "AWS_EC2_METADATA_SERVICE_ENDPOINT", // Tree shaked by esbuild
-  // "AWS_EC2_METADATA_SERVICE_ENDPOINT_MODE", // Tree shaked by esbuild
-  // "AWS_EC2_METADATA_V1_DISABLED", // Added in Nov'23 https://github.com/aws/aws-sdk-js/pull/4517. Tree shaked by esbuild.
+  // "AWS_CONTAINER_AUTHORIZATION_TOKEN", // Tree shaken by esbuild
+  // "AWS_CONTAINER_AUTHORIZATION_TOKEN_FILE", // Tree shaken by esbuild
+  // "AWS_CONTAINER_CREDENTIALS_RELATIVE_URI", // Tree shaken by esbuild
+  // "AWS_CONTAINER_CREDENTIALS_FULL_URI", // Tree shaken by esbuild
+  // "AWS_CSM_CLIENT_ID", // v3 doesn't support CSM. Tree shaken by esbuild.
+  // "AWS_CSM_ENABLED", // v3 doesn't support CSM. Tree shaken by esbuild.
+  // "AWS_CSM_HOST", // v3 doesn't support CSM. Tree shaken by esbuild.
+  // "AWS_CSM_PORT", // v3 doesn't support CSM. Tree shaken by esbuild.
+  // "AWS_EC2_METADATA_DISABLED", // Tree shaken by esbuild
+  // "AWS_EC2_METADATA_SERVICE_ENDPOINT", // Tree shaken by esbuild
+  // "AWS_EC2_METADATA_SERVICE_ENDPOINT_MODE", // Tree shaken by esbuild
+  // "AWS_EC2_METADATA_V1_DISABLED", // Added in Nov'23 https://github.com/aws/aws-sdk-js/pull/4517. Tree shaken by esbuild.
   "AWS_ENABLE_ENDPOINT_DISCOVERY",
   "AWS_ENDPOINT_DISCOVERY_ENABLED",
   "AWS_EXECUTION_ENV",
   "AWS_LAMBDA_FUNCTION_NAME", // Added in May'22 https://github.com/aws/aws-sdk-js/pull/4111
-  // "AWS_NODEJS_CONNECTION_REUSE_ENABLED", // v3 enabled connection reuse by default. Tree shaked by esbuild.
+  // "AWS_NODEJS_CONNECTION_REUSE_ENABLED", // v3 enabled connection reuse by default. Tree shaken by esbuild.
   "AWS_PROFILE",
-  // "AWS_REGION", // Tree shaked by esbuild
-  // "AWS_ROLE_ARN", // Tree shaked by esbuild
-  // "AWS_ROLE_SESSION_NAME", // Tree shaked by esbuild
+  // "AWS_REGION", // Tree shaken by esbuild
+  // "AWS_ROLE_ARN", // Tree shaken by esbuild
+  // "AWS_ROLE_SESSION_NAME", // Tree shaken by esbuild
   "AWS_SDK_LOAD_CONFIG", // v3 loads config by default
   "AWS_SHARED_CREDENTIALS_FILE",
   "AWS_STS_REGIONAL_ENDPOINTS",
-  // "AWS_USE_DUALSTACK_ENDPOINT", // Added in Nov'21 https://github.com/aws/aws-sdk-js/pull/3957. Tree shaked by esbuild.
-  // "AWS_USE_FIPS_ENDPOINT", // Added in Nov'21 https://github.com/aws/aws-sdk-js/pull/3951. Tree shaked by esbuild.
-  // "AWS_WEB_IDENTITY_TOKEN_FILE", // Tree shaked by esbuild
+  // "AWS_USE_DUALSTACK_ENDPOINT", // Added in Nov'21 https://github.com/aws/aws-sdk-js/pull/3957. Tree shaken by esbuild.
+  // "AWS_USE_FIPS_ENDPOINT", // Added in Nov'21 https://github.com/aws/aws-sdk-js/pull/3951. Tree shaken by esbuild.
+  // "AWS_WEB_IDENTITY_TOKEN_FILE", // Tree shaken by esbuild
 ];
 
 /**
