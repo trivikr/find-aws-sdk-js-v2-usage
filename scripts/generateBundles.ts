@@ -42,8 +42,15 @@ const getWebpackCommand = (version: Version, moduleSystem: ModuleSystem) =>
     moduleSystem === ModuleSystem.cjs ? "commonjs2" : "module"
   }`;
 
+const getEsbuildCommand = (version: Version, moduleSystem: ModuleSystem) =>
+  `npx esbuild --bundle --minify ${inputpath[version]} --outfile=${join(
+    fixturesFilepath,
+    getOutputFileName("esbuild", version, moduleSystem)
+  )} --format=${moduleSystem}`;
+
 for (const version of Object.values(Version)) {
   for (const moduleSystem of Object.values(ModuleSystem)) {
     await execAsync(getWebpackCommand(version, moduleSystem));
+    await execAsync(getEsbuildCommand(version, moduleSystem));
   }
 }
