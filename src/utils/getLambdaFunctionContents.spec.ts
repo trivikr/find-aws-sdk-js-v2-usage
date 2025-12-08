@@ -104,11 +104,58 @@ describe(getLambdaFunctionContents.name, () => {
       expect(mockFiles[0].buffer).toHaveBeenCalled();
     });
 
-    it("skips index.js if it's a directory", async () => {
+    it("returns bundleContent for index.mjs file when index.js not present", async () => {
+      const mockFiles = [
+        {
+          type: "File",
+          path: "index.mjs",
+          buffer: vi.fn().mockResolvedValue(Buffer.from(mockBundle)),
+        },
+      ];
+      vi.mocked(unzipper.Open.file).mockResolvedValue({
+        files: mockFiles,
+      } as any);
+
+      const result = await getLambdaFunctionContents(mockZipPath);
+
+      expect(result).toEqual({ bundleContent: mockBundle });
+      expect(mockFiles[0].buffer).toHaveBeenCalled();
+    });
+
+    it("prefers index.js over index.mjs when both present", async () => {
+      const mockFiles = [
+        {
+          type: "File",
+          path: "index.mjs",
+          buffer: vi.fn().mockResolvedValue(Buffer.from("mjs content")),
+        },
+        {
+          type: "File",
+          path: "index.js",
+          buffer: vi.fn().mockResolvedValue(Buffer.from(mockBundle)),
+        },
+      ];
+      vi.mocked(unzipper.Open.file).mockResolvedValue({
+        files: mockFiles,
+      } as any);
+
+      const result = await getLambdaFunctionContents(mockZipPath);
+
+      expect(result).toEqual({ bundleContent: mockBundle });
+      expect(mockFiles[1].buffer).toHaveBeenCalled();
+      expect(mockFiles[0].buffer).not.toHaveBeenCalled();
+    });
+
+    it("skips index.js/mjs if it's a directory", async () => {
       const mockFiles = [
         {
           type: "Directory",
           path: "index.js",
+          buffer: vi.fn(),
+        },
+        {
+          type: "Directory",
+          path: "index.mjs",
           buffer: vi.fn(),
         },
       ];
@@ -120,9 +167,10 @@ describe(getLambdaFunctionContents.name, () => {
 
       expect(result).toEqual({});
       expect(mockFiles[0].buffer).not.toHaveBeenCalled();
+      expect(mockFiles[1].buffer).not.toHaveBeenCalled();
     });
 
-    it("returns empty object when no package.json or index.js", async () => {
+    it("returns empty object when no package.json or index.js/mjs", async () => {
       const mockFiles = [
         {
           type: "File",

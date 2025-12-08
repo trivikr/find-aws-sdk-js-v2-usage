@@ -44,6 +44,8 @@ export const getLambdaFunctionContents = async (
 
   const indexFile = directory.files.find(
     (f) => f.path === "index.js" && f.type === "File"
+  ) || directory.files.find(
+    (f) => f.path === "index.mjs" && f.type === "File"
   );
   if (indexFile) {
     const bundleContent = await indexFile.buffer();
