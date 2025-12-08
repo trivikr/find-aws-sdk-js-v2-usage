@@ -8,7 +8,6 @@ export default {
   target: "node",
   output: {
     path: outputPath,
-    libraryTarget: "commonjs2",
   },
   optimization: {
     minimizer: [
@@ -22,4 +21,7 @@ export default {
       maxChunks: 1,
     }),
   ],
+  experiments: {
+    outputModule: true,
+  },
 };

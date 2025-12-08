@@ -13,18 +13,37 @@ const Version = {
 } as const;
 type Version = (typeof Version)[keyof typeof Version];
 
+const ModuleSystem = {
+  cjs: "cjs",
+  esm: "esm",
+} as const;
+type ModuleSystem = (typeof ModuleSystem)[keyof typeof ModuleSystem];
+
 const inputpath = {
   [Version.v2]: join(fixturesFilepath, "v2", "index.mjs"),
   [Version.v3]: join(fixturesFilepath, "v3", "index.mjs"),
 };
 
-const getWebpackCommand = (version: Version) =>
-  `npx webpack ${inputpath[version]} --output-filename ${[
+const getFileExtension = (moduleSystem: ModuleSystem) =>
+  moduleSystem === ModuleSystem.cjs ? "js" : "mjs";
+
+const getOutputFileName = (
+  bundler: string,
+  version: Version,
+  moduleSystem: ModuleSystem
+) => [bundler, version, getFileExtension(moduleSystem)].join(".");
+
+const getWebpackCommand = (version: Version, moduleSystem: ModuleSystem) =>
+  `npx webpack ${inputpath[version]} --output-filename ${getOutputFileName(
     "webpack",
     version,
-    "js",
-  ].join(".")}`;
+    moduleSystem
+  )} --output-library-type ${
+    moduleSystem === ModuleSystem.cjs ? "commonjs2" : "module"
+  }`;
 
 for (const version of Object.values(Version)) {
-  await execAsync(getWebpackCommand(version));
+  for (const moduleSystem of Object.values(ModuleSystem)) {
+    await execAsync(getWebpackCommand(version, moduleSystem));
+  }
 }

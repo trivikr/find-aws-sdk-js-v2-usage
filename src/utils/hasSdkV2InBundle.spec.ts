@@ -10,12 +10,10 @@ describe("hasSdkV2InBundle", () => {
   );
 
   files.forEach((file) => {
-    it(`returns '${
-      file.endsWith("v2.js") ? "true" : "false"
-    }' for '${file}'`, () => {
+    const hasV2 = file.endsWith("v2.js") || file.endsWith("v2.mjs");
+    it(`returns '${hasV2 ? "true" : "false"}' for '${file}'`, () => {
       const content = readFileSync(join(fixturesDir, file), "utf-8");
-      const expected = file.endsWith("v2.js");
-      expect(hasSdkV2InBundle(content)).toBe(expected);
+      expect(hasSdkV2InBundle(content)).toBe(hasV2);
     });
   });
 });
