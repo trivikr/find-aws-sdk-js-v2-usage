@@ -1,5 +1,5 @@
 import type { Lambda } from "@aws-sdk/client-lambda";
-import { JS_SDK_V2, JS_SDK_V2_MARKER } from "./constants.ts";
+import { JS_SDK_V2_MARKER } from "./constants.ts";
 import { downloadFile } from "./utils/downloadFile.ts";
 import {
   getLambdaFunctionContents,
@@ -40,7 +40,7 @@ export const scanLambdaFunction = async (
       try {
         const packageJson = JSON.parse(packageJsonContent);
         const dependencies = packageJson.dependencies || {};
-        if (JS_SDK_V2 in dependencies) {
+        if ("aws-sdk" in dependencies) {
           console.log(`${JS_SDK_V2_MARKER.Y} ${functionName}`);
           return;
         }
