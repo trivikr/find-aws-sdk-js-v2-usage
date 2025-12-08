@@ -9,6 +9,12 @@ describe("hasSdkV2InBundle", () => {
     statSync(join(fixturesDir, file)).isFile()
   );
 
+  if (files.length === 0) {
+    throw new Error(
+      "No fixture files found. Run 'npm run test:generate:bundles' first."
+    );
+  }
+
   files.forEach((file) => {
     const hasV2 = file.endsWith("v2.js") || file.endsWith("v2.mjs");
     it(`returns '${hasV2 ? "true" : "false"}' for '${file}'`, () => {
