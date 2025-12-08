@@ -23,8 +23,10 @@ Example AWS account which has two functions, one using JS SDK v2 and another usi
 ```console
 $ aws lambda list-functions --query 'Functions[*].FunctionName'
 [
-    "function-which-imports-js-sdk-v2",
-    "function-which-imports-js-sdk-v3"
+    "fn-without-aws-sdk-in-bundle",
+    "fn-with-aws-sdk-in-bundle",
+    "fn-with-aws-sdk-in-package-json-deps",
+    "fn-without-aws-sdk-in-package-json-deps"
 ]
 
 $ npm run scan:lambda
@@ -32,14 +34,15 @@ $ npm run scan:lambda
 ...
 
 Note about output:
-- [Y] means "aws-sdk" is found in package.json dependencies and migration is recommended.
-- [N] means "aws-sdk" is not found in package.json dependencies.
-- [?] means package.json is not found.
-- [X] means failure when parsing package.json.
+- [Y] means "aws-sdk" is found in Lambda function, and migration is recommended.
+- [N] means "aws-sdk" is not found in Lambda function.
+- [?] means script was not able to proceed, and it emits reason.
 
-Reading 2 functions.
-[Y] function-which-imports-js-sdk-v2
-[N] function-which-imports-js-sdk-v3
+Reading 4 functions.
+[N] fn-without-aws-sdk-in-bundle
+[Y] fn-with-aws-sdk-in-bundle
+[Y] fn-with-aws-sdk-in-package-json-deps
+[N] fn-without-aws-sdk-in-package-json-deps
 
 Done.
 ```
