@@ -36,7 +36,7 @@ const AWS_SDK_ENV_VARS = [
  * @returns boolean - Returns true if all AWS SDK v2 environment variables are found in the bundle content, false otherwise.
  */
 export const hasSdkV2InBundle = (bundleContent: string): boolean => {
-  for (let envVar of AWS_SDK_ENV_VARS) {
+  for (const envVar of AWS_SDK_ENV_VARS) {
     if (!bundleContent.includes(envVar)) {
       return false;
     }
