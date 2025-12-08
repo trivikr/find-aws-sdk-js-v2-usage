@@ -23,8 +23,10 @@ Example AWS account which has two functions, one using JS SDK v2 and another usi
 ```console
 $ aws lambda list-functions --query 'Functions[*].FunctionName'
 [
-    "function-which-imports-js-sdk-v2",
-    "function-which-imports-js-sdk-v3"
+    "fn-without-aws-sdk-in-bundle",
+    "fn-with-aws-sdk-in-bundle",
+    "fn-with-aws-sdk-in-package-json-deps",
+    "fn-without-aws-sdk-in-package-json-deps"
 ]
 
 $ npm run scan:lambda
@@ -36,9 +38,11 @@ Note about output:
 - [N] means "aws-sdk" is not found in Lambda function.
 - [?] means script was not able to proceed, and it emits reason.
 
-Reading 3 functions.
-[Y] function-which-imports-js-sdk-v2
-[N] function-which-imports-js-sdk-v3
+Reading 4 functions.
+[N] fn-without-aws-sdk-in-bundle
+[Y] fn-with-aws-sdk-in-bundle
+[Y] fn-with-aws-sdk-in-package-json-deps
+[N] fn-without-aws-sdk-in-package-json-deps
 
 Done.
 ```
