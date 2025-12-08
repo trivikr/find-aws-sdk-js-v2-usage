@@ -36,16 +36,13 @@ const scanLambdaFunctions = async () => {
   const functionsLength = functions.length;
   console.log(`Note about output:`);
   console.log(
-    `- ${JS_SDK_V2_MARKER.Y} means "aws-sdk" is found in package.json dependencies and migration is recommended.`
+    `- ${JS_SDK_V2_MARKER.Y} means "aws-sdk" is found in Lambda function, and migration is recommended.`
   );
   console.log(
-    `- ${JS_SDK_V2_MARKER.N} means "aws-sdk" is not found in package.json dependencies.`
+    `- ${JS_SDK_V2_MARKER.N} means "aws-sdk" is not found in Lambda function.`
   );
   console.log(
-    `- ${JS_SDK_V2_MARKER.UNKNOWN} means script was not able to proceed, and it emits reason.`
-  );
-  console.log(
-    `- ${JS_SDK_V2_MARKER.FAIL} means failure when parsing package.json.\n`
+    `- ${JS_SDK_V2_MARKER.UNKNOWN} means script was not able to proceed, and it emits reason.\n`
   );
 
   console.log(
