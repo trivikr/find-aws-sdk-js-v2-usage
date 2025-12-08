@@ -54,10 +54,17 @@ const getRollupCommand = (version: Version, moduleSystem: ModuleSystem) =>
     getOutputFileName("rollup", version, moduleSystem)
   )} --format=${moduleSystem} -c`;
 
+const getRolldownCommand = (version: Version, moduleSystem: ModuleSystem) =>
+  `npx rolldown ${inputpath[version]} --file=${join(
+    fixturesFilepath,
+    getOutputFileName("rolldown", version, moduleSystem)
+  )} --format=${moduleSystem} -c`;
+
 for (const version of Object.values(Version)) {
   for (const moduleSystem of Object.values(ModuleSystem)) {
     await execAsync(getWebpackCommand(version, moduleSystem));
     await execAsync(getEsbuildCommand(version, moduleSystem));
     await execAsync(getRollupCommand(version, moduleSystem));
+    await execAsync(getRolldownCommand(version, moduleSystem));
   }
 }
