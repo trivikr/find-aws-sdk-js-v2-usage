@@ -66,5 +66,11 @@ for (const version of Object.values(Version)) {
     await execAsync(getEsbuildCommand(version, moduleSystem));
     await execAsync(getRollupCommand(version, moduleSystem));
     await execAsync(getRolldownCommand(version, moduleSystem));
+    if (version === Version.v3 && moduleSystem === ModuleSystem.esm) {
+      // Some issue with setup for creating rolldown.v3.mjs.
+      // It adds an edit to the bundle and removes it in the next run.
+      // https://github.com/trivikr/find-aws-sdk-js-v2-usage/pull/13#issuecomment-3625545089
+      await execAsync(getRolldownCommand(version, moduleSystem));
+    }
   }
 }
