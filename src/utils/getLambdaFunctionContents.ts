@@ -42,11 +42,14 @@ export const getLambdaFunctionContents = async (
     return { packageJsonContents };
   }
 
-  const indexFile = directory.files.find(
-    (f) => f.path === "index.js" && f.type === "File"
-  ) || directory.files.find(
-    (f) => f.path === "index.mjs" && f.type === "File"
-  );
+  let indexFile;
+  for (const path of ["index.js", "index.mjs", "index.cjs"]) {
+    indexFile = directory.files.find(
+      (f) => f.path === path && f.type === "File"
+    );
+    if (indexFile) break;
+  }
+
   if (indexFile) {
     const bundleContent = await indexFile.buffer();
     return { bundleContent: bundleContent.toString() };
