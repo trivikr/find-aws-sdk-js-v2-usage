@@ -13,6 +13,14 @@ export type LambdaFunctionContents = {
   bundleContent?: string;
 };
 
+/**
+ * Extracts the contents of a Lambda Function zip file.
+ * Returns string contents of package.json files, if available.
+ * Otherwise, returns the contents of bundle file.
+ *
+ * @param zipPath - The path to the zip file of Lambda Function.
+ * @returns Promise<LambdaFunctionContents> - Resolves to an object containing the extracted contents.
+ */
 export const getLambdaFunctionContents = async (
   zipPath: string
 ): Promise<LambdaFunctionContents> => {

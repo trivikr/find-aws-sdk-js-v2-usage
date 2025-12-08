@@ -29,6 +29,12 @@ const AWS_SDK_ENV_VARS = [
   "AWS_WEB_IDENTITY_TOKEN_FILE",
 ];
 
+/**
+ * Checks if AWS SDK v2 is present in the provided bundle content by looking for specific environment variables.
+ *
+ * @param bundleContent - The string content of the bundle to check.
+ * @returns boolean - Returns true if all AWS SDK v2 environment variables are found in the bundle content, false otherwise.
+ */
 export const hasSdkV2InBundle = (bundleContent: string): boolean => {
   for (let envVar of AWS_SDK_ENV_VARS) {
     if (!bundleContent.includes(envVar)) {
